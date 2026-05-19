@@ -1,0 +1,210 @@
+{
+  "source_pdf": "tests/fixtures/synthetic/06_single_with_dr_cr_suffix.pdf",
+  "account_number": "987654321012",
+  "account_name": "MR. SAMPLE CUSTOMER",
+  "statement_period": {
+    "start": "01/04/2025",
+    "end": "30/06/2025"
+  },
+  "warnings": [],
+  "transactions": [
+    {
+      "date": "01/04/2025",
+      "description": "Opening Balance",
+      "amount": 0.0,
+      "balance": 25000.0
+    },
+    {
+      "date": "02/04/2025",
+      "description": "UPI/AMAZON/9876543210/PAYMENT",
+      "amount": 1499.0,
+      "balance": 23501.0
+    },
+    {
+      "date": "03/04/2025",
+      "description": "NEFT-CR/HDFC0001234/SALARY APRIL 2025",
+      "amount": 75000.0,
+      "balance": 98501.0
+    },
+    {
+      "date": "05/04/2025",
+      "description": "ATM-WDL/SAMP0001234/BENGALURU",
+      "amount": 5000.0,
+      "balance": 93501.0
+    },
+    {
+      "date": "07/04/2025",
+      "description": "UPI/SWIGGY/abcd@upi/ORDER REFUND",
+      "amount": 240.0,
+      "balance": 93741.0
+    },
+    {
+      "date": "10/04/2025",
+      "description": "IMPS/PARENTS/SBIN0000001/MONTHLY",
+      "amount": 20000.0,
+      "balance": 73741.0
+    },
+    {
+      "date": "12/04/2025",
+      "description": "BIL/ELECTRICITY/BESCOM/MAR-25",
+      "amount": 2150.0,
+      "balance": 71591.0
+    },
+    {
+      "date": "15/04/2025",
+      "description": "POS/DMART/CARD ENDING 1234",
+      "amount": 3275.5,
+      "balance": 68315.5
+    },
+    {
+      "date": "18/04/2025",
+      "description": "UPI/UBER/uber@axis/RIDE",
+      "amount": 340.0,
+      "balance": 67975.5
+    },
+    {
+      "date": "20/04/2025",
+      "description": "NEFT-CR/AXIS0009999/REFUND-INSURANCE",
+      "amount": 1850.0,
+      "balance": 69825.5
+    },
+    {
+      "date": "22/04/2025",
+      "description": "UPI/ZOMATO/zomato@ybl/ORDER",
+      "amount": 612.0,
+      "balance": 69213.5
+    },
+    {
+      "date": "25/04/2025",
+      "description": "BIL/CREDIT-CARD/HDFC/APR STMT",
+      "amount": 15000.0,
+      "balance": 54213.5
+    },
+    {
+      "date": "28/04/2025",
+      "description": "INT-CR/QUARTERLY INTEREST",
+      "amount": 187.45,
+      "balance": 54400.95
+    },
+    {
+      "date": "30/04/2025",
+      "description": "CHQ-DEPOSIT/123456/SELF",
+      "amount": 10000.0,
+      "balance": 64400.95
+    },
+    {
+      "date": "02/05/2025",
+      "description": "UPI/RENT/landlord@okicici",
+      "amount": 18000.0,
+      "balance": 46400.95
+    },
+    {
+      "date": "05/05/2025",
+      "description": "NEFT-CR/HDFC0001234/SALARY MAY 2025",
+      "amount": 75000.0,
+      "balance": 121400.95
+    },
+    {
+      "date": "08/05/2025",
+      "description": "POS/AIRTEL/POSTPAID BILL",
+      "amount": 799.0,
+      "balance": 120601.95
+    },
+    {
+      "date": "11/05/2025",
+      "description": "UPI/NETFLIX/netflix@hdfc",
+      "amount": 649.0,
+      "balance": 119952.95
+    },
+    {
+      "date": "14/05/2025",
+      "description": "ATM-WDL/SAMP0001234/BENGALURU",
+      "amount": 10000.0,
+      "balance": 109952.95
+    },
+    {
+      "date": "18/05/2025",
+      "description": "IMPS-CR/ICIC0000123/REFUND",
+      "amount": 2400.0,
+      "balance": 112352.95
+    },
+    {
+      "date": "22/05/2025",
+      "description": "BIL/MOBILE-RECHARGE/JIO",
+      "amount": 299.0,
+      "balance": 112053.95
+    },
+    {
+      "date": "25/05/2025",
+      "description": "POS/BIG BAZAAR/CARD 1234",
+      "amount": 4280.75,
+      "balance": 107773.2
+    },
+    {
+      "date": "28/05/2025",
+      "description": "UPI/PARENTS/MONTHLY",
+      "amount": 20000.0,
+      "balance": 87773.2
+    },
+    {
+      "date": "30/05/2025",
+      "description": "INT-CR/MAY INTEREST",
+      "amount": 210.55,
+      "balance": 87983.75
+    },
+    {
+      "date": "02/06/2025",
+      "description": "BIL/BROADBAND/ACT FIBERNET",
+      "amount": 1199.0,
+      "balance": 86784.75
+    },
+    {
+      "date": "05/06/2025",
+      "description": "NEFT-CR/HDFC0001234/SALARY JUNE 2025",
+      "amount": 75000.0,
+      "balance": 161784.75
+    },
+    {
+      "date": "08/06/2025",
+      "description": "UPI/AMAZON/refund@axis",
+      "amount": 1499.0,
+      "balance": 163283.75
+    },
+    {
+      "date": "12/06/2025",
+      "description": "POS/RELIANCE-DIGITAL/CARD 1234",
+      "amount": 32999.0,
+      "balance": 130284.75
+    },
+    {
+      "date": "16/06/2025",
+      "description": "BIL/CREDIT-CARD/HDFC/JUN STMT",
+      "amount": 18500.0,
+      "balance": 111784.75
+    },
+    {
+      "date": "20/06/2025",
+      "description": "ATM-WDL/SAMP0001234/BENGALURU",
+      "amount": 15000.0,
+      "balance": 96784.75
+    },
+    {
+      "date": "25/06/2025",
+      "description": "UPI/PARENTS/MONTHLY",
+      "amount": 20000.0,
+      "balance": 76784.75
+    },
+    {
+      "date": "28/06/2025",
+      "description": "INT-CR/QUARTERLY INTEREST",
+      "amount": 295.3,
+      "balance": 77080.05
+    },
+    {
+      "date": "30/06/2025",
+      "description": "Closing Balance",
+      "amount": 0.0,
+      "balance": 77080.05
+    }
+  ]
+}
