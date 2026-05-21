@@ -1,113 +1,49 @@
 import { useState, useRef, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
 import { validateExtension } from '../utils/validateExtension';
-import { validateBankStatement } from '../utils/validateBankStatement';
 import { useParseResult } from '../context/ParseResultContext';
-import { parseBankStatement } from '../utils/parseBankStatement';
-import type { ParseResult, ParseError } from '../types';
-
-// Set up the PDF.js worker
-GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.mjs',
-  import.meta.url
-).toString();
-
-/**
- * Extracts all text content from a PDF file using pdfjs-dist.
- * Uses Y-coordinate tracking to insert newlines when text moves to a new row.
- */
-async function extractPdfText(file: File): Promise<string> {
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
-  const textParts: string[] = [];
-
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-
-    const lines: string[] = [];
-    let currentLine = '';
-    let lastY: number | null = null;
-
-    for (const item of content.items) {
-      if (!('str' in item) || !('transform' in item)) continue;
-      const textItem = item as { str: string; transform: number[] };
-      const y = textItem.transform[5]; // Y-coordinate from transform matrix
-
-      if (lastY !== null && Math.abs(y - lastY) > 2) {
-        // Y changed significantly — new line
-        if (currentLine.trim()) {
-          lines.push(currentLine.trim());
-        }
-        currentLine = textItem.str;
-      } else {
-        currentLine += (currentLine ? ' ' : '') + textItem.str;
-      }
-      lastY = y;
-    }
-    // Push the last line
-    if (currentLine.trim()) {
-      lines.push(currentLine.trim());
-    }
-
-    textParts.push(lines.join('\n'));
-  }
-
-  return textParts.join('\n');
-}
+import { parseStatementViaApi, ParseApiError } from '../utils/parseStatementApi';
 
 export default function UploadPage() {
   const [error, setError] = useState<string | null>(null);
+  const [warnings, setWarnings] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { setParseResult } = useParseResult();
 
+  function resetFileInput() {
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     setError(null);
+    setWarnings([]);
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Step 1: Extension validation
     if (!validateExtension(file.name)) {
       setError('Only PDF files are accepted. Please select a .pdf file.');
-      // Reset the file input so the user can re-select
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      resetFileInput();
       return;
     }
 
     setIsProcessing(true);
 
     try {
-      // Step 2: Extract text from PDF
-      const pdfText = await extractPdfText(file);
-
-      // Step 3: Validate bank statement structure
-      const validation = validateBankStatement(pdfText);
-      if (!validation.valid) {
-        setError(validation.reason);
-        setIsProcessing(false);
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        return;
-      }
-
-      // Step 4: Parse the extracted text
-      const result: ParseResult = parseBankStatement(pdfText);
-
-      // Step 5: Store result in context
+      const result = await parseStatementViaApi(file);
       setParseResult(result);
-
-      // Step 6: Navigate to processing page
+      if (result.warnings && result.warnings.length > 0) {
+        setWarnings(result.warnings);
+      }
       navigate('/processing');
     } catch (err) {
-      // Handle ParseError objects (which have message + location) and standard Errors
-      const parseErr = err as ParseError;
-      const message = parseErr.message
-        ? (parseErr.location ? `${parseErr.message} (at ${parseErr.location})` : parseErr.message)
-        : 'An unexpected error occurred while processing the PDF.';
-      setError(message);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      const apiErr = err as ParseApiError;
+      setError(apiErr.message || 'An unexpected error occurred while processing the PDF.');
+      if (apiErr.warnings && apiErr.warnings.length > 0) {
+        setWarnings(apiErr.warnings);
+      }
+      resetFileInput();
     } finally {
       setIsProcessing(false);
     }
@@ -117,6 +53,9 @@ export default function UploadPage() {
     <div className="upload-page">
       <h1>GST Statement Processor</h1>
       <p>Upload a bank statement PDF to extract and view transactions.</p>
+      <p style={{ fontSize: '0.85rem', color: '#888' }}>
+        PDFs are sent to the parsing service. Files are processed in memory and not stored.
+      </p>
 
       <div className="upload-dropzone">
         <input
@@ -134,6 +73,17 @@ export default function UploadPage() {
       {error && (
         <div className="error-message" role="alert">
           {error}
+        </div>
+      )}
+
+      {warnings.length > 0 && (
+        <div className="warning-message" role="status" style={{ color: '#a06000' }}>
+          <strong>Notes from the parser:</strong>
+          <ul style={{ margin: '0.25rem 0 0 1rem' }}>
+            {warnings.map((w, i) => (
+              <li key={i}>{w}</li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
