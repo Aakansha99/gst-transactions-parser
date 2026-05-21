@@ -1,16 +1,19 @@
 # GST Statement Processor
 
-A browser-based tool for extracting and viewing transactions from bank statement PDFs. Upload a statement, the app parses it client-side with [pdfjs-dist](https://github.com/mozilla/pdf.js), and shows the transactions grouped by account with search and assignee filtering.
+A browser-based tool for extracting and viewing transactions from bank statement PDFs. Upload a statement, the FastAPI backend in `api/` parses it, and the React frontend shows the transactions grouped by account with search and assignee filtering.
 
-Built with [React 18](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), and [Vite](https://vite.dev/).
+Built with [React 18](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [Vite](https://vite.dev/), and a [FastAPI](https://fastapi.tiangolo.com/) parsing service backed by [pdfplumber](https://github.com/jsvine/pdfplumber).
 
 ## Features
 
-- Client-side PDF parsing — no files leave your browser
+- Server-side PDF parsing with pdfplumber — handles multi-bank layouts (ICICI, HDFC, Allahabad, YES Bank, etc.)
+- Files are uploaded to the parser, processed in memory, and not stored on disk
 - Extracts statement period and transactions grouped by account
 - Search transactions by name or description
 - Assignee mappings stored in `localStorage`
 - Routing between upload and processing views via `react-router-dom`
+
+> Privacy note: previous versions parsed PDFs entirely client-side. The current version uploads the PDF to a parsing service. If client-side parsing is a hard requirement for your deployment, run the API locally and proxy through the Vite dev server (the default).
 
 ## Prerequisites
 
@@ -26,19 +29,39 @@ npm --version
 
 ## Getting Started
 
-1. Clone the repository and install dependencies:
+You need to run **two processes** during development: the FastAPI backend (port 8000) and the Vite dev server (port 5173). The Vite server proxies `/api/*` to the backend.
+
+1. Install frontend dependencies:
 
    ```bash
    npm install
    ```
 
-2. Start the dev server:
+2. Set up the backend (one-time):
+
+   ```bash
+   cd api
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements.txt
+   cd ..
+   ```
+
+3. Start the backend in one terminal:
+
+   ```bash
+   cd api
+   source .venv/bin/activate
+   uvicorn app.main:app --reload --port 8000
+   ```
+
+4. Start the frontend in another terminal:
 
    ```bash
    npm run dev
    ```
 
-3. Open the URL printed in the terminal (usually http://localhost:5173).
+5. Open the URL printed by Vite (usually http://localhost:5173).
 
 ## Available Scripts
 
@@ -53,22 +76,36 @@ npm --version
 ## Project Structure
 
 ```
-src/
-├── App.tsx                  # Router + context provider
-├── main.tsx                 # React entry point
-├── context/
-│   └── ParseResultContext.tsx   # Shares parse results between pages
-├── pages/
-│   ├── UploadPage.tsx       # PDF upload + client-side parsing
-│   └── ProcessingPage.tsx   # Transaction view with filters
-├── utils/
-│   ├── parseBankStatement.ts
-│   ├── validateBankStatement.ts
-│   ├── validateExtension.ts
-│   ├── filterTransactionGroups.ts
-│   ├── AssigneeDatabase.ts
-│   └── prettyPrintTransactions.ts
-└── types.ts                 # Shared TypeScript types
+.
+├── api/                          # FastAPI parsing service
+│   ├── app/
+│   │   ├── main.py               # FastAPI app, CORS, routes
+│   │   ├── parser_adapter.py     # ParseResult → UI JSON shape
+│   │   └── parser/               # vendored copy of scripts/parse_statement.py
+│   ├── tests/
+│   ├── requirements.txt
+│   └── README.md
+├── scripts/                      # Python parser & coverage matrix
+│   ├── parse_statement.py        # the parser (also vendored under api/)
+│   ├── make_synthetic_fixtures.py
+│   ├── verify_synthetic.py
+│   ├── regression_run.py
+│   └── verify_parsed.py
+├── tests/fixtures/               # PDFs used by both parser and API tests
+└── src/                          # React frontend
+    ├── App.tsx                   # Router + context provider
+    ├── main.tsx                  # React entry point
+    ├── context/
+    │   └── ParseResultContext.tsx
+    ├── pages/
+    │   ├── UploadPage.tsx        # POSTs PDF to /api/parse
+    │   └── ProcessingPage.tsx    # Transaction view with filters
+    ├── utils/
+    │   ├── parseStatementApi.ts  # client for the FastAPI backend
+    │   ├── filterTransactionGroups.ts
+    │   ├── AssigneeDatabase.ts
+    │   └── validateExtension.ts
+    └── types.ts                  # Shared TypeScript types
 ```
 
 ## Usage
