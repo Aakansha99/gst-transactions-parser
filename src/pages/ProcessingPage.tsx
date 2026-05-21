@@ -32,12 +32,26 @@ export default function ProcessingPage() {
 
   const totalTransactions = filteredGroups.reduce((sum, g) => sum + g.transactions.length, 0);
 
+  // Summary stats
+  const stats = useMemo(() => {
+    const allTxns = filteredGroups.flatMap(g => g.transactions);
+    const credits = allTxns.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0);
+    const debits = allTxns.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
+    return { credits, debits, net: credits - debits, count: allTxns.length };
+  }, [filteredGroups]);
+
   if (!parseResult) {
     return (
       <div className="no-data-page">
-        <h1>Statement Processed</h1>
-        <p>No statement data available. Please upload a bank statement first.</p>
-        <Link to="/" className="back-link">← Upload a statement</Link>
+        <div className="no-data-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+        </div>
+        <h1>No Statement Loaded</h1>
+        <p>Upload a bank statement to see your transactions here.</p>
+        <Link to="/" className="btn-primary">← Upload a statement</Link>
       </div>
     );
   }
@@ -48,8 +62,10 @@ export default function ProcessingPage() {
 
   return (
     <div className="processed-page">
-      <Link to="/" className="back-link">← Upload another statement</Link>
-      <h1>Statement Processed</h1>
+      <div className="page-header">
+        <Link to="/" className="back-link">← Upload another statement</Link>
+        <h1>Statement Processed</h1>
+      </div>
 
       {periodUnknown ? (
         <div className="period-warning" role="alert">
@@ -61,6 +77,28 @@ export default function ProcessingPage() {
           <span className="dates">{statementPeriod.startDate} — {statementPeriod.endDate}</span>
         </div>
       )}
+
+      {/* Summary cards */}
+      <div className="summary-cards">
+        <div className="summary-card credit">
+          <div className="summary-label">Total Credits</div>
+          <div className="summary-value">+ ₹{formatAmount(stats.credits)}</div>
+        </div>
+        <div className="summary-card debit">
+          <div className="summary-label">Total Debits</div>
+          <div className="summary-value">− ₹{formatAmount(stats.debits)}</div>
+        </div>
+        <div className="summary-card net">
+          <div className="summary-label">Net</div>
+          <div className={`summary-value ${stats.net >= 0 ? 'positive' : 'negative'}`}>
+            {stats.net >= 0 ? '+' : '−'} ₹{formatAmount(stats.net)}
+          </div>
+        </div>
+        <div className="summary-card count">
+          <div className="summary-label">Transactions</div>
+          <div className="summary-value">{stats.count}</div>
+        </div>
+      </div>
 
       {!localStorageAvailable && (
         <div className="storage-warning" role="status">
@@ -105,7 +143,7 @@ export default function ProcessingPage() {
           <div key={groupIndex} className="tx-group">
             <div className="tx-group-header">
               <span className="acc-number">{group.account.accountNumber}</span>
-              {group.account.accountName}
+              <span className="acc-name">{group.account.accountName}</span>
             </div>
             <table className="tx-table">
               <thead>
@@ -135,7 +173,7 @@ export default function ProcessingPage() {
       )}
 
       {totalTransactions > 0 && (
-        <div style={{ textAlign: 'right', fontSize: '0.85rem', color: '#888', marginTop: '0.5rem' }}>
+        <div className="results-footer">
           Showing {totalTransactions} transaction{totalTransactions !== 1 ? 's' : ''} across {filteredGroups.length} account{filteredGroups.length !== 1 ? 's' : ''}
         </div>
       )}
